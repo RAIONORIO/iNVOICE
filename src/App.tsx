@@ -4,9 +4,7 @@
  */
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
   Trash2, 
@@ -28,12 +26,12 @@ import {
   ExternalLink,
   Loader2
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
+import { Label } from '../components/ui/label';
+import { Card, CardContent } from '../components/ui/card';
+import { Separator } from '../components/ui/separator';
 import {
   Table,
   TableBody,
@@ -41,8 +39,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { cn } from '@/lib/utils';
+} from "../components/ui/table";
+import { cn } from '../lib/utils';
 
 interface InvoiceItem {
   id: string;
@@ -171,52 +169,20 @@ export default function App() {
     }
   };
 
-  const handleDownloadPDF = async () => {
-    if (!invoiceRef.current) return;
-    
-    setIsDownloading(true);
-    try {
-      // Garante que estamos no modo preview para capturar
-      const originalView = view;
-      if (originalView !== 'preview') {
-        setView('preview');
-        // Espera o render
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
+ const handleDownloadPDF = () => {
+  if (view !== "preview") {
+    setView("preview");
 
-      const element = invoiceRef.current;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
+    setTimeout(() => {
+      window.print();
+    }, 500);
+
+  } else {
+    window.print();
+  }
+};
       
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`orcamento-${data.invoiceNo || 'documento'}.pdf`);
-      
-      // Volta para a visão original se necessário
-      if (originalView !== 'preview') {
-        setView(originalView);
-      }
-    } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
-      alert("Ocorreu um erro ao gerar o PDF. Tente usar a opção 'Imprimir PDF' e 'Salvar como PDF'.");
-    } finally {
-      setIsDownloading(false);
-    }
-  };
+     
 
   const handleOpenNewTab = () => {
     window.open(window.location.href, '_blank');
@@ -536,10 +502,10 @@ export default function App() {
           "flex-1 flex justify-center",
           view === 'edit' ? "hidden lg:flex" : "flex"
         )}>
-          <Card className="print-container w-full max-w-[800px] shadow-2xl border-none rounded-none overflow-hidden bg-white">
+          <Card className="print-container w-full max-w-200 shadow-2xl border-none rounded-none overflow-hidden bg-white">
             <CardContent className="p-0">
               {/* Invoice Content - Matching the Image Style */}
-              <div ref={invoiceRef} className="p-12 space-y-12 min-h-[1100px] flex flex-col bg-white">
+              <div ref={invoiceRef} className="p-12 space-y-12 min-h-275 flex flex-col bg-white">
                 
                 {/* Header */}
                 <div className="flex justify-between items-start">
